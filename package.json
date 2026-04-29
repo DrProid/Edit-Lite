@@ -1,0 +1,24 @@
+{
+  "name": "edit-lite",
+  "version": "1.0.0",
+  "description": "A repository of scripts and tools used to edit videos and images.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DrProid/Edit-Lite.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/DrProid/Edit-Lite/issues"
+  },
+  "homepage": "https://github.com/DrProid/Edit-Lite#readme",
+  "dependencies": {
+    "inquirer": "^12.9.6"
+  }
+}

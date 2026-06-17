@@ -18,6 +18,7 @@ async function main() {
         { name: "Convert a video", value: "convertVideo" },
         { name: "Join Videos", value: "concatVideo" },
         { name: "Convert an image", value: "convertImage" },
+        { name: "Batch convert images", value: "batchConvertImage" },
         { name: "Exit", value: "exit" }
       ]
     }
@@ -42,6 +43,11 @@ async function main() {
     case "convertImage":
       const { default: convertImage } = await import("./tools/convertImage.js");
       await convertImage();
+      break;
+
+    case "batchConvertImage":
+      const { default: batchConvertImage } = await import("./tools/batchConvertImage.js");
+      await batchConvertImage();
       break;
 
     case "exit":

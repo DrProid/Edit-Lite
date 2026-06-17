@@ -19,3 +19,5 @@ This is to remember what I did to set this up:
 
 To do:
 [] It doesn't make sense to have cutVideo because it is practically all of the function of auto-editor. Add options to set the --edit flag. Maybe "Do you want to cut silence?".
+[x] Convert an image with ImageMagick (`magick`).
+[x] Batch convert images with ImageMagick (`magick`).

@@ -2,6 +2,7 @@ import inquirer from "inquirer";
 import fs from "fs";
 import path from "path";
 import { spawn } from "child_process";
+import yauzl from "yauzl";
 
 function timeToSeconds(timeStr) {
   const parts = timeStr.split(":").map(Number);
@@ -203,5 +204,64 @@ export function runMagick(args) {
       cwd: "./working_directory",
     });
     proc.on("close", (code) => resolve(code));
+  });
+}
+
+export const ZIP_EXTENSIONS = [".zip"];
+
+export function getZipsInWorkingDirectory(dir = "./working_directory") {
+  const files = fs.readdirSync(dir);
+  return files.filter((file) =>
+    ZIP_EXTENSIONS.includes(path.extname(file).toLowerCase())
+  );
+}
+
+export function unzipEntryToFile(zipPath, entryName, outputPath) {
+  return new Promise((resolve, reject) => {
+    yauzl.open(zipPath, { lazyEntries: true }, (err, zipfile) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      let bytes = 0;
+      let resolved = false;
+      const settle = (result) => {
+        if (resolved) return;
+        resolved = true;
+        try { zipfile.close(); } catch {}
+        resolve(result);
+      };
+      const fail = (e) => {
+        if (resolved) return;
+        resolved = true;
+        try { zipfile.close(); } catch {}
+        reject(e);
+      };
+
+      zipfile.on("error", fail);
+      zipfile.on("entry", (entry) => {
+        if (/\/$/.test(entry.fileName)) {
+          zipfile.readEntry();
+          return;
+        }
+        if (path.basename(entry.fileName) !== entryName) {
+          zipfile.readEntry();
+          return;
+        }
+
+        zipfile.openReadStream(entry, (rsErr, readStream) => {
+          if (rsErr) { fail(rsErr); return; }
+          const writeStream = fs.createWriteStream(outputPath);
+          readStream.on("data", (chunk) => { bytes += chunk.length; });
+          readStream.on("error", fail);
+          writeStream.on("error", fail);
+          writeStream.on("close", () => settle({ found: true, bytes }));
+          readStream.pipe(writeStream);
+        });
+      });
+      zipfile.on("end", () => settle({ found: false }));
+      zipfile.readEntry();
+    });
   });
 }

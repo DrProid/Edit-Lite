@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/DrProid/Edit-Lite#readme",
   "dependencies": {
-    "inquirer": "^12.9.6"
+    "inquirer": "^12.9.6",
+    "yauzl": "^3.2.0"
   }
 }

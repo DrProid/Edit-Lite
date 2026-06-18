@@ -18,12 +18,14 @@ This is to remember what I did to set this up:
 
 
 ## Menu
-The wizard has two top-level submenus:
+The wizard has three top-level submenus:
 - **Edit videos**: cut a video (auto-editor), join videos (ffmpeg concat).
 - **Convert**: convert a video to web-safe mp4 (ffmpeg), convert a single image, batch convert images, batch convert subtitles (SRT/VTT) via ffmpeg.
+- **Extract**: unzip subtitles (extract a named entry from each zip via `yauzl`).
 
 ## To do
 [] It doesn't make sense to have cutVideo because it is practically all of the function of auto-editor. Add options to set the --edit flag. Maybe "Do you want to cut silence?".
 [x] Convert an image with ImageMagick (`magick`).
 [x] Batch convert images with ImageMagick (`magick`).
 [x] Batch convert subtitles (SRT/VTT) via ffmpeg.
+[x] Batch unzip subtitles (extract a named entry from each zip).

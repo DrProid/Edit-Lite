@@ -1,5 +1,4 @@
 import inquirer from "inquirer";
-import { spawn } from "child_process";
 import {
   colour,
   getImagesInWorkingDirectory,
@@ -7,18 +6,8 @@ import {
   promptForQuality,
   promptForResize,
   buildMagickArgs,
+  runMagick,
 } from "./utils.js";
-
-function runMagick(args) {
-  return new Promise((resolve) => {
-    const proc = spawn("magick", args, {
-      stdio: ["inherit", "inherit", "inherit"],
-      shell: true,
-      cwd: "./working_directory",
-    });
-    proc.on("close", (code) => resolve(code));
-  });
-}
 
 export default async function convertImage() {
   const dir = "./working_directory";

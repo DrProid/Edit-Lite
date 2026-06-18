@@ -1,58 +1,74 @@
 #!/usr/bin/env node
 import inquirer from "inquirer";
 
-const colours = {
-  red: txt => `\x1b[31m${txt}\x1b[0m`,
-  green: txt => `\x1b[32m${txt}\x1b[0m`,
-  yellow: txt => `\x1b[33m${txt}\x1b[0m`,
-};
+const TOP_LEVEL_CHOICES = [
+  { name: "Edit videos", value: "editVideos" },
+  { name: "Convert", value: "convert" },
+  { name: "Exit", value: "exit" },
+];
 
-async function main() {
+const EDIT_CHOICES = [
+  { name: "Cut a video", value: "autoEdit" },
+  { name: "Join videos", value: "concatVideo" },
+  { name: "Back", value: "back" },
+];
+
+const CONVERT_CHOICES = [
+  { name: "Convert a video", value: "convertVideo" },
+  { name: "Convert an image", value: "convertImage" },
+  { name: "Batch convert images", value: "batchConvertImage" },
+  { name: "Batch convert subtitles", value: "batchConvertSubtitles" },
+  { name: "Back", value: "back" },
+];
+
+async function runTool(value) {
+  const mod = await import(`./tools/${value}.js`);
+  await mod.default();
+}
+
+async function editVideosSubmenu() {
   const { action } = await inquirer.prompt([
     {
       type: "list",
       name: "action",
       message: "What do you want to do?",
-      choices: [
-        { name: "Cut a video", value: "autoEdit" },
-        { name: "Convert a video", value: "convertVideo" },
-        { name: "Join Videos", value: "concatVideo" },
-        { name: "Convert an image", value: "convertImage" },
-        { name: "Batch convert images", value: "batchConvertImage" },
-        { name: "Exit", value: "exit" }
-      ]
-    }
+      choices: EDIT_CHOICES,
+    },
   ]);
+  if (action === "back") return;
+  await runTool(action);
+}
 
-  switch (action) {
-      case "autoEdit":
-        const { default: autoEdit } = await import("./tools/autoEdit.js");
-        await autoEdit();
-        break;
+async function convertSubmenu() {
+  const { action } = await inquirer.prompt([
+    {
+      type: "list",
+      name: "action",
+      message: "What do you want to do?",
+      choices: CONVERT_CHOICES,
+    },
+  ]);
+  if (action === "back") return;
+  await runTool(action);
+}
 
-    case "concatVideo":
-      const { default: concatVideo } = await import("./tools/concatVideo.js");
-      await concatVideo();
-      break;
+async function main() {
+  while (true) {
+    const { action } = await inquirer.prompt([
+      {
+        type: "list",
+        name: "action",
+        message: "What do you want to do?",
+        choices: TOP_LEVEL_CHOICES,
+      },
+    ]);
 
-      case "convertVideo":
-      const { default: convertVideo } = await import("./tools/convertVideo.js");
-      await convertVideo();
-      break;
-
-    case "convertImage":
-      const { default: convertImage } = await import("./tools/convertImage.js");
-      await convertImage();
-      break;
-
-    case "batchConvertImage":
-      const { default: batchConvertImage } = await import("./tools/batchConvertImage.js");
-      await batchConvertImage();
-      break;
-
-    case "exit":
+    if (action === "exit") {
       console.log("Goodbye!");
-      process.exit(0);
+      return;
+    }
+    if (action === "editVideos") await editVideosSubmenu();
+    if (action === "convert") await convertSubmenu();
   }
 }
 

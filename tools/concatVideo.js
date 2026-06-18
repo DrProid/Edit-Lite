@@ -1,15 +1,13 @@
 import fs from "fs";
 import path from "path";
 import inquirer from "inquirer";
-import { spawn } from "child_process";
+import { colour, runFfmpeg } from "./utils.js";
 
 export default async function convertVideo() {
   const dir = "./working_directory";
 
-  // Read all files in the directory
   const files = fs.readdirSync(dir);
 
-  // Filter to common video extensions
   const videoExtensions = [".mp4", ".mov", ".avi", ".mkv", ".webm"];
   const videos = files.filter((file) =>
     videoExtensions.includes(path.extname(file).toLowerCase())
@@ -20,11 +18,9 @@ export default async function convertVideo() {
     return;
   }
 
-  //create a file concatList.txt, make sure it is empty if it already exists
   const concatFilePath = path.join(dir, "concatList.txt");
-  fs.writeFileSync(concatFilePath, ""); // Create or truncate the file to ensure it's empty
+  fs.writeFileSync(concatFilePath, "");
 
-  //make the list of videos to concat
   const selectedVideos = [];
   let addingVideos = true;
 
@@ -43,7 +39,7 @@ export default async function convertVideo() {
       addingVideos = false;
     } else {
       selectedVideos.push(chosenVideo);
-      fs.appendFileSync(concatFilePath, `file '${chosenVideo}'\n`); // Add the video to concatList.txt
+      fs.appendFileSync(concatFilePath, `file '${chosenVideo}'\n`);
     }
   }
 
@@ -52,7 +48,6 @@ export default async function convertVideo() {
     return;
   }
 
-  //ask for a name for the new file
   const { fileName } = await inquirer.prompt([
     {
       type: "input",
@@ -74,21 +69,12 @@ export default async function convertVideo() {
     `"${fileName}.mp4"`,
   ];
 
-  // Show the command to the user
   console.log("Running: ffmpeg", args.join(" "));
 
-  // Spawn the process
-  const proc = spawn("ffmpeg", args, {
-    stdio: ["inherit", "inherit", "inherit"], // stdin, stdout, stderr
-    shell: true, // important: runs via the shell so CLI formatting works
-    cwd: "./working_directory", // run the command from this folder
-  });
-
-  proc.on("close", (code) => {
-    if (code === 0) {
-      console.log("ffmpeg finished successfully!");
-    } else {
-      console.log(`ffmpeg exited with code ${code}`);
-    }
-  });
+  const code = await runFfmpeg(args);
+  if (code === 0) {
+    console.log(colour.green("ffmpeg finished successfully!"));
+  } else {
+    console.log(colour.red(`ffmpeg exited with code ${code}`));
+  }
 }

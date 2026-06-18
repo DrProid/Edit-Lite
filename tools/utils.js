@@ -1,6 +1,7 @@
 import inquirer from "inquirer";
 import fs from "fs";
 import path from "path";
+import { spawn } from "child_process";
 
 function timeToSeconds(timeStr) {
   const parts = timeStr.split(":").map(Number);
@@ -167,4 +168,40 @@ export function buildMagickArgs({ chosen, targetFormat, quality, dimensions }) {
   args.push(`"${outputName}"`);
 
   return { args, outputName };
+}
+
+export const SUBTITLE_EXTENSIONS = [".srt", ".vtt"];
+
+export const SUBTITLE_FORMAT_CHOICES = [
+  { name: "SRT", value: "srt" },
+  { name: "VTT", value: "vtt" },
+];
+
+export function getSubtitlesInWorkingDirectory(dir = "./working_directory") {
+  const files = fs.readdirSync(dir);
+  return files.filter((file) =>
+    SUBTITLE_EXTENSIONS.includes(path.extname(file).toLowerCase())
+  );
+}
+
+export function runFfmpeg(args) {
+  return new Promise((resolve) => {
+    const proc = spawn("ffmpeg", args, {
+      stdio: ["inherit", "inherit", "inherit"],
+      shell: true,
+      cwd: "./working_directory",
+    });
+    proc.on("close", (code) => resolve(code));
+  });
+}
+
+export function runMagick(args) {
+  return new Promise((resolve) => {
+    const proc = spawn("magick", args, {
+      stdio: ["inherit", "inherit", "inherit"],
+      shell: true,
+      cwd: "./working_directory",
+    });
+    proc.on("close", (code) => resolve(code));
+  });
 }
